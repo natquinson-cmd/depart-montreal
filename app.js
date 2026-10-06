@@ -475,10 +475,27 @@ function importContent(file) {
     if (!c || !Array.isArray(c.groups) || !c.groups.length) { msg("Ce fichier ne contient pas de checklist (liste « groups » absente)."); return; }
     try {
       await db.ref("canada/contenu").set(c);
-      const cur = (await db.ref("canada/etat").once("value")).val();
-      if (!cur && data.etatInitial) await db.ref("canada/etat").set(data.etatInitial);
       const n = c.groups.reduce((s, g) => s + ((g.tasks || []).length), 0);
-      msg("Contenu importé : " + c.groups.length + " groupes, " + n + " tâches. Les coches existantes sont conservées.");
+      let extra = "";
+      const ini = data.etatInitial;
+      if (ini) {
+        // Reprise d'un ancien avancement : fusion une seule fois par source, on n'efface jamais une coche
+        const cur = (await db.ref("canada/etat").once("value")).val() || {};
+        const src = ini.source || "initial";
+        const deja = (cur.reprises || {})[src];
+        if (!deja) {
+          const upd = {};
+          let added = 0;
+          Object.entries(ini.checks || {}).forEach(([id, v]) => {
+            if (!(cur.checks || {})[id] && v && (v === true || v.done)) { upd["checks/" + id] = { done: true, at: Date.now(), by: user.uid }; added++; }
+          });
+          if (ini.departure && parseDate(ini.departure)) upd.departure = ini.departure;
+          upd["reprises/" + src] = Date.now();
+          await db.ref("canada/etat").update(upd);
+          extra = " Avancement repris : " + added + " coche(s) ajoutée(s)" + (ini.departure ? ", date de départ " + fmtDay(parseDate(ini.departure)) : "") + ".";
+        } else extra = " L'avancement de cette source avait déjà été repris, rien n'a été modifié.";
+      }
+      msg("Contenu importé : " + c.groups.length + " groupes, " + n + " tâches. Les coches existantes sont conservées." + extra);
     } catch (e) { msg("Import refusé (" + errMsg(e) + ")."); }
   };
   r.readAsText(file);
