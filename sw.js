@@ -1,6 +1,6 @@
 // Copie hors connexion de la page (coque + SDK Firebase). Les données ne passent pas par ici :
 // elles restent dans Firebase et dans la copie locale de chaque appareil autorisé.
-const CACHE = "depart-montreal-v1";
+const CACHE = "depart-montreal-v2";
 const SHELL = ["./", "index.html", "app.js", "icon.svg", "manifest.webmanifest",
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
   "https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js",
