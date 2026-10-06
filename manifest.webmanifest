@@ -1,0 +1,9 @@
+{
+  "name": "Départ pour Montréal",
+  "short_name": "Montréal",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f4f2",
+  "theme_color": "#c8321f",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
